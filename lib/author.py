@@ -1,23 +1,38 @@
-class Author:
-    def __init__(self,name,id=None):
-        self.id = id 
-        self.name = name
+from lib.db import CURSOR, CONN
+from lib.article import Article
 
-    def __repr__(self):
-        return f"<Author {self.id}: {self.name}>"
-    
-    @property
-    def name(self):
-        return self._name
-    @name.setter
-    def name(self,name):
-        if isinstance(name,str):
-            self.name = name
-        else:
-            raise TypeError("Name must be a string")
-    
+class Author:
+    all = []
+
+    def __init__(self, name, genre, id=None):
+        self.id = id
+        self.name = name
+        self.genre = genre
+        Author.all.append(self)
+
     def save(self):
-        sql = """INSERT INTO authors(name)
-                VALUE(?)
-                """
-        
+        CURSOR.execute("INSERT INTO authors (name, genre) VALUES (?, ?)", (self.name, self.genre))
+        CONN.commit()
+        self.id = CURSOR.lastrowid
+
+    @classmethod
+    def get_all(cls):
+        CURSOR.execute("SELECT * FROM authors")
+        rows = CURSOR.fetchall()
+        return [Author(row[1], row[2], row[0]) for row in rows]
+
+    def articles(self):
+        CURSOR.execute("SELECT * FROM articles WHERE author_id = ?", (self.id,))
+        rows = CURSOR.fetchall()
+        from lib.article import Article
+        return [Article(row[1], row[2], row[3], row[4], row[0]) for row in rows]
+
+    def magazines(self):
+        CURSOR.execute("""
+            SELECT DISTINCT m.* FROM magazines m
+            JOIN articles a ON a.magazine_id = m.id
+            WHERE a.author_id = ?
+        """, (self.id,))
+        rows = CURSOR.fetchall()
+        from lib.magazine import Magazine
+        return [Magazine(row[1], row[2], row[0]) for row in rows]

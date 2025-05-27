@@ -1,4 +1,3 @@
-# lib/models/article.py
 from lib.db.connection import get_connection
 from lib.models.author import Author
 from lib.models.magazine import Magazine

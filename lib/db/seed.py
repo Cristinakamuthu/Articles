@@ -1,25 +1,34 @@
+# lib/db/seed.py
+
 from lib.db.connection import get_connection
 
 def seed_data():
     conn = get_connection()
     cursor = conn.cursor()
 
-    authors = [('Alice'), ('Bob'), ('Charlie')]
-    cursor.executemany("INSERT INTO authors (name) VALUES (?)", [(a,) for a in authors])
+   
+    authors = ['Alice Walker', 'John Steinbeck', 'Toni Morrison']
+    for name in authors:
+        cursor.execute("INSERT INTO authors (name) VALUES (?)", (name,))
 
-    magazines = [('Tech Times', 'Technology'), ('Foodies', 'Cooking'), ('Health First', 'Wellness')]
-    cursor.executemany("INSERT INTO magazines (name, category) VALUES (?, ?)", magazines)
+   
+    magazines = [('Time', 'News'), ('Vogue', 'Fashion'), ('Scientific American', 'Science')]
+    for name, category in magazines:
+        cursor.execute("INSERT INTO magazines (name, category) VALUES (?, ?)", (name, category))
 
+   
     articles = [
-        ('AI in 2025', 1, 1),
-        ('Python Recipes', 2, 2),
-        ('Wellness Tips', 3, 3)
+        ('The Color Purple Review', 1, 1),
+        ('East of Eden Analysis', 2, 2),
+        ('Beloved Breakdown', 3, 3)
     ]
-    cursor.executemany("INSERT INTO articles (title, author_id, magazine_id) VALUES (?, ?, ?)", articles)
+    for title, author_id, magazine_id in articles:
+        cursor.execute("INSERT INTO articles (title, author_id, magazine_id) VALUES (?, ?, ?)",
+                       (title, author_id, magazine_id))
 
     conn.commit()
     conn.close()
-    print("Seed data inserted!")
 
 if __name__ == "__main__":
     seed_data()
+    print("Database seeded successfully!")
